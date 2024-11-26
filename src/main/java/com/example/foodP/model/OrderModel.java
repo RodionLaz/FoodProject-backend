@@ -19,20 +19,21 @@ public class OrderModel {
     private Long businessId;
 
     @Column(nullable = false)
-    private String status;
+    private OrderStatusType status;
 
     @Column(nullable = false)
     private Date orderCreatedDate;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Date orderDoneDate;
 
     public OrderModel() {}
 
-    public OrderModel(Long customerId, Long businessId, String status) {
+    public OrderModel(Long customerId, Long businessId, OrderStatusType status,Date orderCreatedDate ) {
         this.customerId = customerId;
         this.businessId = businessId;
         this.status = status;
+        this.orderCreatedDate = orderCreatedDate;
     }
 
     public Long getOrderId() {
@@ -59,12 +60,27 @@ public class OrderModel {
         this.businessId = businessId;
     }
 
-    public String getStatus() {
+    public OrderStatusType getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(OrderStatusType status) {
         this.status = status;
     }
 
+    public Date getOrderCreatedDate() {
+        return orderCreatedDate;
+    }
+
+    public void setOrderCreatedDate(Date orderCreatedDate) {
+        this.orderCreatedDate = orderCreatedDate;
+    }
+
+    public Date getOrderDoneDate() {
+        return orderDoneDate;
+    }
+
+    public void setOrderDoneDate(Date orderDoneDate) {
+        this.orderDoneDate = orderDoneDate;
+    }
 }
