@@ -1,7 +1,14 @@
 package com.example.foodP.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -17,9 +24,30 @@ public class RestaurantModel extends UserModel  {
     @Column(nullable = false, unique = true)
     private int phoneNumber;
 
+    
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AccountType accountType;
 
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Item> items = new ArrayList<>();
+
+
+    public void addItem(Item item) {
+        items.add(item);
+        item.setRestaurant(this);
+    }
+
+    public void removeItem(Item item) {
+        items.remove(item);
+        item.setRestaurant(null);
+    }
+
+    // Getters and Setters for items
+    public List<Item> getItems() {
+        return items;
+    }
+    
     public RestaurantModel() {
         super();
     }

@@ -14,14 +14,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtUtil {
 
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
 
-
-    public String generateToken(String username, String email) {
+    public static Long extractUserId(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("UserId", Long.class);
+    }
+    public static String generateToken(String username, String email,Long UserId) {
         return Jwts.builder()
                 .claim("username", username)
                 .claim("email", email)
+                .claim("UserId", UserId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
                 .signWith(key, SignatureAlgorithm.HS256)

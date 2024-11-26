@@ -25,13 +25,11 @@ public class AuthService {
     private UserRepository userRepository;
     private RestaurantRepository restaurantRepository;
     private PasswordEncoder passwordEncoder;
-    private JwtUtil jwtUtil;
 
     @Autowired
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,RestaurantRepository restaurantRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtUtil = jwtUtil;
         this.restaurantRepository = restaurantRepository;
     }
 
@@ -46,7 +44,7 @@ public class AuthService {
 
         UserModel newUser = new UserModel(username,email,passwordEncoder.encode(password));
         userRepository.save(newUser);
-        String jwt = jwtUtil.generateToken(username, newUser.getEmail());
+        String jwt = JwtUtil.generateToken(username, newUser.getEmail(),existingUser.get().getId());
         session.setAttribute("jwt", jwt);
         return new ResponseEntity<>("User Created",HttpStatus.CREATED);
     }
@@ -58,7 +56,7 @@ public class AuthService {
             return new ResponseEntity<>("User doesn't exists.", HttpStatus.BAD_REQUEST);
         }
         if (passwordEncoder.matches(password, existingUser.get().getPassword())) {
-            String jwt = jwtUtil.generateToken(username, existingUser.get().getEmail());
+            String jwt = JwtUtil.generateToken(username, existingUser.get().getEmail(),existingUser.get().getId());
             session.setAttribute("jwt", jwt);
             return new ResponseEntity<>("Login successful.", HttpStatus.OK);
         }else{
@@ -67,7 +65,7 @@ public class AuthService {
     }
 
 
-    public ResponseEntity<String> registerbusiness(String username,String password, String email,String RestaurantName, String address,String accountType,int phoneNumber, HttpSession session){
+    public ResponseEntity<String> registerBusiness(String username,String password, String email,String RestaurantName, String address,String accountType,int phoneNumber, HttpSession session){
         Optional<UserModel> existingUser = userRepository.findByEmail(email);
         Optional<RestaurantModel> existingRestaurant = restaurantRepository.findByEmail(email);
         if (existingUser.isPresent() ||existingRestaurant.isPresent() ) {
@@ -95,19 +93,19 @@ public class AuthService {
             .build();
             
         restaurantRepository.save(newRestaurant);   
-        String jwt = jwtUtil.generateToken(username, newRestaurant.getEmail());
+        String jwt = JwtUtil.generateToken(username, newRestaurant.getEmail(),existingUser.get().getId());
         session.setAttribute("jwt", jwt);
         return new ResponseEntity<>("business Created",HttpStatus.CREATED);
     }
   
 
-    public ResponseEntity<String> loginbusiness(String username,String password, HttpSession session){
+    public ResponseEntity<String> loginBusiness(String username,String password, HttpSession session){
         Optional<UserModel> existingUser = userRepository.findByUsername(username);
         if (existingUser.isEmpty()) {
             return new ResponseEntity<>("User doesn't exists.", HttpStatus.BAD_REQUEST);
         }
         if (passwordEncoder.matches(password, existingUser.get().getPassword())) {
-            String jwt = jwtUtil.generateToken(username, existingUser.get().getEmail());
+            String jwt = JwtUtil.generateToken(username, existingUser.get().getEmail(),existingUser.get().getId());
             session.setAttribute("jwt", jwt);
             return new ResponseEntity<>("Login successful.", HttpStatus.OK);
         }else{
