@@ -100,12 +100,12 @@ public class AuthService {
   
 
     public ResponseEntity<String> loginBusiness(String username,String password, HttpSession session){
-        Optional<UserModel> existingUser = userRepository.findByUsername(username);
+        Optional<RestaurantModel> existingUser = restaurantRepository.findByUsername(username);
         if (existingUser.isEmpty()) {
             return new ResponseEntity<>("User doesn't exists.", HttpStatus.BAD_REQUEST);
         }
         if (passwordEncoder.matches(password, existingUser.get().getPassword())) {
-            String jwt = JwtUtil.generateToken(username, existingUser.get().getEmail(),existingUser.get().getId());
+            String jwt = JwtUtil.generateToken(username,existingUser.get().getId());
             session.setAttribute("jwt", jwt);
             return new ResponseEntity<>("Login successful.", HttpStatus.OK);
         }else{

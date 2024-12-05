@@ -11,6 +11,7 @@ import com.example.foodP.model.RestaurantModel;
 public interface RestaurantRepository extends JpaRepository<RestaurantModel,Long> {
 
     Optional<RestaurantModel> findByEmail(String email);
+    Optional<RestaurantModel> findByUsername(String username); 
 
     @Query("SELECT r FROM RestaurantModel r JOIN r.items i WHERE i.id = :itemId")
     Optional<RestaurantModel> findRestaurantByItemId(@Param("itemId") Long itemId);

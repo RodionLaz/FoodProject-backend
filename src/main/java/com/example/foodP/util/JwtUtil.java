@@ -25,6 +25,7 @@ public class JwtUtil {
                 .getBody()
                 .get("UserId", Long.class);
     }
+    //customers token
     public static String generateToken(String username, String email,Long UserId) {
         return Jwts.builder()
                 .claim("username", username)
@@ -35,4 +36,15 @@ public class JwtUtil {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+    //business token 
+    public static String generateToken(String username,Long businessId) {
+        return Jwts.builder()
+                .claim("username", username)
+                .claim("businessId", businessId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+    
 }
