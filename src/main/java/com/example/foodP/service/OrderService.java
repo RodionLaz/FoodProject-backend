@@ -40,6 +40,22 @@ public class OrderService {
         orderRepository.save(order);
         return ResponseEntity.ok("Order created successfully");
     }
+    public ResponseEntity<String> updateOrderStatus(HttpSession session,String token,Long orderId,String status){
+        Optional<OrderModel> orderOp =  orderRepository.findById(orderId);
+        if (orderOp.isEmpty()) {
+            return ResponseEntity.status(404).body("Order not found for the id : " + orderId);
+        }
+        OrderModel order = orderOp.get();
+        if (!OrderStatusType.isValidStatus(status)) {
+            return ResponseEntity.status(400).body("Invalid order status");
+        }
+        if (!(order.getBusinessId().equals(JwtUtil.extractBusinessId(token)))) {
+            return ResponseEntity.status(403).body("Unauthorized access to update order status");
+        }
+        order.setStatus(OrderStatusType.stringToEnum(status));
+        orderRepository.save(order);
+        return ResponseEntity.ok("Order status updated successfully");
+    }
 
 
 
