@@ -16,6 +16,7 @@ public class JwtUtil {
 
     private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
+    private JwtUtil(){}
 
     public static Long extractUserId(String token) {
         return Jwts.parserBuilder()
@@ -25,12 +26,21 @@ public class JwtUtil {
                 .getBody()
                 .get("UserId", Long.class);
     }
+
+    public static Long extractBusinessId(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("businessId", Long.class);
+    }
     //customers token
-    public static String generateToken(String username, String email,Long UserId) {
+    public static String generateToken(String username, String email,Long userId) {
         return Jwts.builder()
                 .claim("username", username)
                 .claim("email", email)
-                .claim("UserId", UserId)
+                .claim("UserId", userId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
                 .signWith(key, SignatureAlgorithm.HS256)
