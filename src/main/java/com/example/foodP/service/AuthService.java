@@ -4,9 +4,11 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.foodP.model.AccountType;
 import com.example.foodP.model.RestaurantModel;
@@ -35,7 +37,7 @@ public class AuthService {
 
 
     
-    public ResponseEntity<String> registerUser(String username,String password, String email, HttpSession session){
+    public ResponseEntity<String> registerUser(String username,String password, String email, HttpSession session) throws ResponseStatusException{
         Optional<UserModel> existingUser = userRepository.findByEmail(email);
         Optional<RestaurantModel> existingRestaurant = restaurantRepository.findByEmail(email);
         if (existingUser.isPresent() ||existingRestaurant.isPresent() ) {
@@ -65,7 +67,7 @@ public class AuthService {
     }
 
 
-    public ResponseEntity<String> registerBusiness(String username,String password, String email,String RestaurantName, String address,String accountType,int phoneNumber, HttpSession session){
+    public ResponseEntity<String> registerBusiness(String username,String password, String email,String restaurantName, String address,String accountType,int phoneNumber, HttpSession session){
         Optional<UserModel> existingUser = userRepository.findByEmail(email);
         Optional<RestaurantModel> existingRestaurant = restaurantRepository.findByEmail(email);
         if (existingUser.isPresent() ||existingRestaurant.isPresent() ) {
@@ -87,7 +89,7 @@ public class AuthService {
             .setAddress(address)
             .setEmail(email)
             .setPhoneNumber(phoneNumber)
-            .setName(RestaurantName)
+            .setName(restaurantName)
             .setPassword(passwordEncoder.encode(password))
             .setUsername(username)
             .build();
