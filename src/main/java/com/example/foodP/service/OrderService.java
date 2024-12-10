@@ -4,7 +4,11 @@ import java.sql.Date;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
 import com.example.foodP.model.OrderModel;
 import com.example.foodP.model.OrderStatusType;
 import com.example.foodP.model.RestaurantModel;
@@ -14,9 +18,8 @@ import com.example.foodP.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 
-/**
- * Service class for managing orders.
- */
+
+@Service
 public class OrderService {
     
     private OrderRepository orderRepository;
@@ -43,13 +46,13 @@ public class OrderService {
      * @param orderCreatedDate The date the order was created.
      * @return A ResponseEntity indicating the outcome of the operation.
      */
+
     public ResponseEntity<String> createOrder(HttpSession session, Long itemId,String token,Date orderCreatedDate){
         Long customerId = JwtUtil.extractUserId(token);
         Optional<RestaurantModel> restaurant = restaurantRepository.findRestaurantByItemId(itemId);
         if(restaurant.isEmpty()){
             return ResponseEntity.status(404).body("Restaurant not found for the item");
         }
-
         OrderModel order = new OrderModel(customerId,restaurant.get().getId(),OrderStatusType.CREATED,orderCreatedDate);
         orderRepository.save(order);
         return ResponseEntity.ok("Order created successfully");
@@ -63,6 +66,7 @@ public class OrderService {
      * @param status The new status of the order.
      * @return A ResponseEntity indicating the outcome of the operation.
      */
+    @CachePut(value = "orders", key = "#orderId")
     public ResponseEntity<String> updateOrderStatus(HttpSession session,String token,Long orderId,String status){
         Optional<OrderModel> orderOp =  orderRepository.findById(orderId);
         if (orderOp.isEmpty()) {
@@ -77,7 +81,12 @@ public class OrderService {
         }
         order.setStatus(OrderStatusType.stringToEnum(status));
         orderRepository.save(order);
-        return ResponseEntity.ok("Order status updated successfully");
+        try {
+            String orderJson = new ObjectMapper().writeValueAsString(order);
+            return ResponseEntity.ok(orderJson);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error processing order information");
+        }
     }
     /**
      * Retrieves order information by order ID.
@@ -87,6 +96,7 @@ public class OrderService {
      * @param orderId The ID of the order to retrieve information for.
      * @return A ResponseEntity containing the order information.
      */
+    @Cacheable(value = "orders", key = "#orderId")
     public ResponseEntity<String> getOrderInfoById(HttpSession session,String token,Long orderId){
         Optional<OrderModel> orderOp =  orderRepository.findById(orderId);
         if (orderOp.isEmpty()) {
